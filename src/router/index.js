@@ -3,7 +3,7 @@ import AppTasksView from '@/views/AppTasksView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  { path: '/tasks', component: AppTasksView, alias: '/home' },
+  { path: '/', component: AppTasksView, alias: '/tasks' },
   { path: '/create-form', component: AppCreateView }
 ]
 

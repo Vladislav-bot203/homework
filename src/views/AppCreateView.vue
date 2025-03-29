@@ -1,46 +1,29 @@
 <template>
-    <form @submit.prevent="submit">
+    <form @submit.prevent="$store.dispatch('pushToDatabase')">
         <h1>Создать новую задачу</h1>
         <label for="task-name">Название</label>
-        <input type="text" id="task-name" v-model="title">
+        <input type="text" id="task-name" v-model="$store.state.title">
         <label for="date">Дата дедлайна</label>
-        <input type="date" id="date" v-model="date">
+        <input type="date" id="date" v-model="$store.state.date">
         <label for="description">Описание</label>
-        <textarea id="description" v-model="text"></textarea>
+        <textarea id="description" v-model="$store.state.text"></textarea>
         <button type="submit" :class="isValid ? 'active' : 'inactive'">Создать</button>
     </form>
 </template>
 
 <script>
-import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
+import { computed } from 'vue'
 
 export default {
   setup () {
-    const title = ref('')
-    const date = ref('')
-    const text = ref('')
     const store = useStore()
 
-    const isValid = computed(() => title.value.length !== 0 && date.value.length !== 0 && text.value.length !== 0)
-
-    const submit = () => {
-      store.state.tasks.push({
-        title: title.value,
-        date: date.value,
-        text: text.value
-      })
-      title.value = ''
-      date.value = ''
-      text.value = ''
-    }
-
+    const isValid = computed(() => {
+      return store.getters.isValid
+    })
     return {
-      isValid,
-      title,
-      date,
-      text,
-      submit
+      isValid
     }
   }
 }

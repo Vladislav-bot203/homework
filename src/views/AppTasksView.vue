@@ -2,7 +2,7 @@
     <div class="container">
         <h3>Всего активных задач: 1</h3>
         <div class="tasks-container">
-            <div class="task" v-for="(task, idx) in tasks" :key="idx">
+            <div class="task" v-for="task in tasks" :key="task.id">
                 <div class="task-header">
                     <h2>{{ task.title }}</h2>
                     <small class="_active">Активен</small>
@@ -18,13 +18,17 @@
 
 <script>
 import { useStore } from 'vuex'
+import { computed } from 'vue'
 
 export default {
   setup () {
     const store = useStore()
+    store.dispatch('loadTasks')
+
+    const tasks = computed(() => store.getters.tasks)
 
     return {
-      tasks: store.state.tasks
+      tasks
     }
   }
 }
