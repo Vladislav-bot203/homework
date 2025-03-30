@@ -1,34 +1,58 @@
 <template>
-    <div class="container">
+    <div v-if="loading" class="loader">
+        <app-loader></app-loader>
+    </div>
+    <div v-else>
+        <div class="container" v-if="isTasksPath">
         <h3>Всего активных задач: 1</h3>
         <div class="tasks-container">
             <div class="task" v-for="task in tasks" :key="task.id">
                 <div class="task-header">
                     <h2>{{ task.title }}</h2>
-                    <small class="_active">Активен</small>
+                    <small :class="task.status">{{
+                    task.status === '_active' ?
+                    'Активно'
+                    : task.status === 'inactive' ?
+                    'Отменено'
+                    : 'Выполняется'
+                    }}</small>
                 </div>
                 <hr />
                 <p>{{ task.date }}</p>
                 <hr />
-                <router-link to=""><button class="button">Посмотреть</button></router-link>
+                <router-link :to="`/tasks/${task.id}`"><button class="button">Посмотреть</button></router-link>
             </div>
         </div>
+    </div>
+    <router-view></router-view>
     </div>
 </template>
 
 <script>
 import { useStore } from 'vuex'
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import AppLoader from '@/components/AppLoader.vue'
 
 export default {
+  components: { AppLoader },
   setup () {
     const store = useStore()
-    store.dispatch('loadTasks')
+    const route = useRoute()
+    const loading = ref(true)
+
+    onMounted(async () => {
+      await store.dispatch('loadTasks')
+      loading.value = false
+    })
 
     const tasks = computed(() => store.getters.tasks)
+    const isTasksPath = computed(() => route.path === '/tasks' || route.path === '/')
 
     return {
-      tasks
+      tasks,
+      isTasksPath,
+      loading
     }
   }
 }
@@ -46,6 +70,13 @@ h3 {
 
 .tasks-container {
     width: 100%;
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
 }
 
 .task {

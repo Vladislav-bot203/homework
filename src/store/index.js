@@ -15,6 +15,9 @@ export default createStore({
     },
     tasks (state) {
       return state.tasks
+    },
+    getStatus (state, id) {
+      return state.tasks.find((e) => e.id === id).status
     }
   },
   mutations: {
@@ -30,7 +33,8 @@ export default createStore({
         const dataToSave = {
           text: state.text,
           title: state.title,
-          date: state.date
+          date: state.date,
+          status: (new Date(state.date) - new Date()) > 0 ? '_active' : 'inactive'
         }
 
         const data = await fetch('https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks.json', {
@@ -53,7 +57,7 @@ export default createStore({
         commit('clearFields')
       }
     },
-    async loadTasks ({ state }) {
+    async loadTasks ({ state, dispatch }) {
       if (state.tasks.length === 0) {
         try {
           const data = await fetch('https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks.json')
@@ -65,8 +69,33 @@ export default createStore({
               ...response[key]
             }
           })
+
+          await dispatch('checkStatus')
         } catch (error) {
           console.log(error)
+        }
+      }
+    },
+    async changeStatus ({ state }, payload) {
+      const currentTask = payload.currentTask
+
+      if (currentTask.status !== payload.changeTo) {
+        currentTask.status = payload.changeTo
+
+        const res = await fetch(`https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks/${currentTask.id}.json`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: payload.changeTo })
+        })
+        console.log(res)
+      }
+    },
+    async checkStatus ({ state, dispatch }) {
+      for await (const task of state.tasks) {
+        if (new Date(task.date) - new Date() <= 0) {
+          await dispatch('changeStatus', { changeTo: 'inactive', currentTask: task })
         }
       }
     }
