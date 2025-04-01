@@ -18,6 +18,19 @@ export default createStore({
     },
     getStatus (state, id) {
       return state.tasks.find((e) => e.id === id).status
+    },
+    getStatusName: (state) => (status) => {
+      if (status === 'inactive') return 'Отменено'
+      if (status === 'pending') return 'Выполняется'
+      if (status === '_active') return 'Активно'
+    },
+    getActiveCount (state) {
+      return state.tasks.reduce((sum, current) => {
+        if (current.status === '_active') {
+          return ++sum
+        }
+        return sum
+      }, 0)
     }
   },
   mutations: {
@@ -76,20 +89,23 @@ export default createStore({
         }
       }
     },
-    async changeStatus ({ state }, payload) {
+    async changeStatus (_, payload) {
       const currentTask = payload.currentTask
 
       if (currentTask.status !== payload.changeTo) {
+        if (new Date(currentTask.date) < new Date()) {
+          currentTask.status = 'inactive'
+          return
+        }
         currentTask.status = payload.changeTo
 
-        const res = await fetch(`https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks/${currentTask.id}.json`, {
+        await fetch(`https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks/${currentTask.id}.json`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ status: payload.changeTo })
         })
-        console.log(res)
       }
     },
     async checkStatus ({ state, dispatch }) {

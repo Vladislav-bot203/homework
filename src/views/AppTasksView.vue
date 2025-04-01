@@ -4,18 +4,12 @@
     </div>
     <div v-else>
         <div class="container" v-if="isTasksPath">
-        <h3>Всего активных задач: 1</h3>
+        <h3><strong>Всего активных задач:</strong> {{ active }}</h3>
         <div class="tasks-container">
             <div class="task" v-for="task in tasks" :key="task.id">
                 <div class="task-header">
                     <h2>{{ task.title }}</h2>
-                    <small :class="task.status">{{
-                    task.status === '_active' ?
-                    'Активно'
-                    : task.status === 'inactive' ?
-                    'Отменено'
-                    : 'Выполняется'
-                    }}</small>
+                    <small :class="task.status">{{ $store.getters.getStatusName(task.status) }}</small>
                 </div>
                 <hr />
                 <p>{{ task.date }}</p>
@@ -47,12 +41,14 @@ export default {
     })
 
     const tasks = computed(() => store.getters.tasks)
+    const active = computed(() => store.getters.getActiveCount)
     const isTasksPath = computed(() => route.path === '/tasks' || route.path === '/')
 
     return {
       tasks,
       isTasksPath,
-      loading
+      loading,
+      active
     }
   }
 }

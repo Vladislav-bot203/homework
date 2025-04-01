@@ -1,9 +1,9 @@
 <template>
     <div class="task-container">
         <h1>{{ currentTask.title }}</h1>
-        <p>Статус: <small :class="currentTask.status">Завершен</small></p>
+        <p><strong>Статус:</strong> <small :class="currentTask.status">{{ $store.getters.getStatusName(currentTask.status) }}</small></p>
         <p><strong>Дедлайн:</strong> {{ currentTask.date }}</p>
-        <p>Описание: {{ currentTask.text }}</p>
+        <p><strong>Описание:</strong> {{ currentTask.text }}</p>
         <div class="btns-container">
             <button class="button primary" @click="changeStatus({ changeTo: 'pending', currentTask })">Взять в работу</button>
             <button class="button success" @click="changeStatus({ changeTo: 'inactive',  currentTask })">Завершить</button>
