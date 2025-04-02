@@ -1,5 +1,5 @@
 <template>
-    <div class="task-container">
+    <div class="task-container" v-if="currentTask">
         <h1>{{ currentTask.title }}</h1>
         <p><strong>Статус:</strong> <small :class="currentTask.status">{{ $store.getters.getStatusName(currentTask.status) }}</small></p>
         <p><strong>Дедлайн:</strong> {{ currentTask.date }}</p>
@@ -14,16 +14,29 @@
 
 <script>
 import { useStore } from 'vuex'
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   setup () {
     const store = useStore()
     const route = useRoute()
+    const router = useRouter()
 
     const currentTask = computed(() => {
       return store.getters.tasks.find((e) => e.id === route.params.id)
+    })
+
+    onMounted(() => {
+      if (!currentTask.value) {
+        router.replace({ name: 'NotFoundPageView' })
+      }
+    })
+
+    watch(currentTask, (newVal) => {
+      if (!newVal) {
+        router.replace({ name: 'NotFoundPageView' })
+      }
     })
 
     const changeStatus = (payload) => {

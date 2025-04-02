@@ -1,4 +1,5 @@
 <template>
+    <app-alert v-if="isVisible"></app-alert>
     <form @submit.prevent="$store.dispatch('pushToDatabase')">
         <h1>Создать новую задачу</h1>
         <label for="task-name">Название</label>
@@ -14,16 +15,22 @@
 <script>
 import { useStore } from 'vuex'
 import { computed } from 'vue'
+import AppAlert from '@/components/AppAlert.vue'
 
 export default {
+  components: { AppAlert },
   setup () {
     const store = useStore()
 
     const isValid = computed(() => {
       return store.getters.isValid
     })
+
+    const isVisible = computed(() => store.getters.getAlertVisibility)
+
     return {
-      isValid
+      isValid,
+      isVisible
     }
   }
 }

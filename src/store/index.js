@@ -6,7 +6,13 @@ export default createStore({
       tasks: [],
       title: '',
       date: '',
-      text: ''
+      text: '',
+      alert: {
+        type: 'error',
+        message: '',
+        name: '',
+        visible: false
+      }
     }
   },
   getters: {
@@ -31,6 +37,18 @@ export default createStore({
         }
         return sum
       }, 0)
+    },
+    getAlertVisibility (state) {
+      return state.alert.visible
+    },
+    getAlertName (state) {
+      return state.alert.name
+    },
+    getAlertType (state) {
+      return state.alert.type
+    },
+    getAlertMessage (state) {
+      return state.alert.message
     }
   },
   mutations: {
@@ -38,6 +56,12 @@ export default createStore({
       state.date = ''
       state.text = ''
       state.title = ''
+    },
+    closeAlert (state) {
+      state.alert.message = ''
+      state.alert.name = ''
+      state.alert.type = ''
+      state.alert.visible = false
     }
   },
   actions: {
@@ -67,6 +91,10 @@ export default createStore({
 
         commit('clearFields')
       } catch (error) {
+        state.alert.message = error.message
+        state.alert.type = 'error'
+        state.alert.name = error.name
+        state.alert.visible = true
         commit('clearFields')
       }
     },
@@ -85,27 +113,37 @@ export default createStore({
 
           await dispatch('checkStatus')
         } catch (error) {
-          console.log(error)
+          state.alert.message = error.message
+          state.alert.type = 'error'
+          state.alert.name = error.name
+          state.alert.visible = true
         }
       }
     },
-    async changeStatus (_, payload) {
-      const currentTask = payload.currentTask
+    async changeStatus ({ state }, payload) {
+      try {
+        const currentTask = payload.currentTask
 
-      if (currentTask.status !== payload.changeTo) {
-        if (new Date(currentTask.date) < new Date()) {
-          currentTask.status = 'inactive'
-          return
+        if (currentTask.status !== payload.changeTo) {
+          if (new Date(currentTask.date) < new Date()) {
+            currentTask.status = 'inactive'
+            return
+          }
+          currentTask.status = payload.changeTo
+
+          await fetch(`https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks/${currentTask.id}.json`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: payload.changeTo })
+          })
         }
-        currentTask.status = payload.changeTo
-
-        await fetch(`https://homework-project-669d4-default-rtdb.europe-west1.firebasedatabase.app/tasks/${currentTask.id}.json`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ status: payload.changeTo })
-        })
+      } catch (error) {
+        state.alert.message = error.message
+        state.alert.type = 'error'
+        state.alert.name = error.name
+        state.alert.visible = true
       }
     },
     async checkStatus ({ state, dispatch }) {

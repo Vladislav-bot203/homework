@@ -2,7 +2,14 @@
     <header>
         <h2>Freelance</h2>
         <ul>
-            <li><router-link to="/tasks">Все задачи</router-link></li>
+            <li><router-link to="/tasks" custom v-slot="{ navigate, href }">
+                <a
+                href="#"
+                @click="navigate"
+                :class="{
+                  active: $route.path.indexOf(href) !== -1
+                }">Все задачи</a>
+            </router-link></li>
             <li><router-link to="/create-form">Создать</router-link></li>
         </ul>
     </header>

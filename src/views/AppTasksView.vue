@@ -1,4 +1,5 @@
 <template>
+    <app-alert v-if="isVisible"></app-alert>
     <div v-if="loading" class="loader">
         <app-loader></app-loader>
     </div>
@@ -27,9 +28,10 @@ import { useStore } from 'vuex'
 import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import AppLoader from '@/components/AppLoader.vue'
+import AppAlert from '@/components/AppAlert.vue'
 
 export default {
-  components: { AppLoader },
+  components: { AppLoader, AppAlert },
   setup () {
     const store = useStore()
     const route = useRoute()
@@ -43,12 +45,14 @@ export default {
     const tasks = computed(() => store.getters.tasks)
     const active = computed(() => store.getters.getActiveCount)
     const isTasksPath = computed(() => route.path === '/tasks' || route.path === '/')
+    const isVisible = computed(() => store.getters.getAlertVisibility)
 
     return {
       tasks,
       isTasksPath,
       loading,
-      active
+      active,
+      isVisible
     }
   }
 }
@@ -58,6 +62,7 @@ export default {
 
 .container {
     width: 100%;
+    padding-bottom: 20px;
 }
 
 h3 {
